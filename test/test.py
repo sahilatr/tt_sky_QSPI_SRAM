@@ -11,7 +11,7 @@ async def test_project(dut):
     dut._log.info("Start")
 
     # Setup a 100 MHz System Clock (10 ns period)
-    clock = Clock(dut.clk, 10, units="ns")
+    clock = Clock(dut.clk, 10, unit="ns")
     cocotb.start_soon(clock.start())
 
     # Initialize signals
@@ -21,10 +21,10 @@ async def test_project(dut):
     dut.uio_in.value = 0
 
     # Reset sequence
-    await Timer(25, units="ns")
+    await Timer(25, unit="ns")
     await FallingEdge(dut.clk)
     dut.rst_n.value = 1
-    await Timer(5, units="ns")
+    await Timer(5, unit="ns")
 
     # Helper coroutine: Standard 2-Clock Write
     async def write_byte(addr, data):
@@ -71,7 +71,7 @@ async def test_project(dut):
         dut.ui_in.value = (dut.ui_in.value.integer & 0xF0) | (wr_data & 0x0F)
 
         await RisingEdge(dut.clk)
-        await Timer(1, units="ns")  # Evaluation strobe on commit edge
+        await Timer(1, unit="ns")  # Evaluation strobe on commit edge
 
         actual_uo = dut.uo_out.value.integer
         if actual_uo == expected_rd_data:
