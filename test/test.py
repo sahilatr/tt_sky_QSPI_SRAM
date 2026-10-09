@@ -51,11 +51,12 @@ async def test_project(dut):
         wr_addr, wr_data, rd_addr, expected_rd_data
     ):
         await FallingEdge(dut.clk)
-        # Setup Write Target & MSB Data, plus Read Address & Controls simultaneously
+        # Setup Write Target & MSB Data
         ui_val = ((wr_addr & 0x0F) << 4) | ((wr_data >> 4) & 0x0F)
         dut.ui_in.value = ui_val
 
-        uio_val = dut.uio_in.value.to_unsigned() & ~0xFE
+        # Setup Read Target (rd_sel on uio_in[7:3]) & Control (wen=1, ren=1, A4)
+        uio_val = dut.uio_in.value.to_unsigned() & ~0xFE  # clear control & rd_sel
         uio_val |= (
             ((wr_addr >> 4) & 0x01)
             | (1 << 1)  # wen = 1
@@ -66,16 +67,13 @@ async def test_project(dut):
         dut.ena.value = 1
 
         await FallingEdge(dut.clk)
-        # Drive LSB for write commit clock 2
+        # Drive LSB for write commit
         dut.ui_in.value = (dut.ui_in.value.to_unsigned() & 0xF0) | (wr_data & 0x0F)
 
-        # Keep read enabled for one full cycle to let combinational read resolve completely
-        await FallingEdge(dut.clk)
+        # Allow time for combinatorial propagation before sampling
+        await Timer(3, unit="ns")
 
-        # Sample after propagation
-        await Timer(2, unit="ns")
         actual_uo = dut.uo_out.value.to_unsigned()
-
         if actual_uo == expected_rd_data:
             dut._log.info(
                 f"\n>>> [SIMULTANEOUS SUCCESS] While writing to Addr {wr_addr}, "
@@ -87,6 +85,7 @@ async def test_project(dut):
             )
             assert actual_uo == expected_rd_data
 
+        await FallingEdge(dut.clk)
         # Clear enables
         uio_val = dut.uio_in.value.to_unsigned() & ~((1 << 1) | (1 << 2))
         dut.uio_in.value = uio_val
