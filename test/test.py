@@ -70,8 +70,8 @@ async def test_project(dut):
         # Drive LSB for write commit
         dut.ui_in.value = (dut.ui_in.value.to_unsigned() & 0xF0) | (wr_data & 0x0F)
 
-        await RisingEdge(dut.clk)
-        await Timer(1, unit="ns")  # Evaluation strobe on commit edge
+        # Allow time for data propagation and stable read output evaluation
+        await Timer(4, unit="ns")
 
         actual_uo = dut.uo_out.value.to_unsigned()
         if actual_uo == expected_rd_data:
