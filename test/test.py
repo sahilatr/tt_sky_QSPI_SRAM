@@ -89,7 +89,7 @@ async def test_project(dut):
         # Clear enables
         uio_val = dut.uio_in.value.to_unsigned() & ~((1 << 1) | (1 << 2))
         dut.uio_in.value = uio_val
-        dut.ui_in.value = dut.ui_in.value.to_unsigned & 0xF0
+        dut.ui_in.value = dut.ui_in.value.to_unsigned() & 0xF0
 
     # Step 1: Write 0xC3 into Address 5
     dut._log.info(
