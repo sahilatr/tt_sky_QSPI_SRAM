@@ -1,11 +1,11 @@
 # Tiny Tapeout project information
 project:
-  title:        ""      # Project title
-  author:       ""      # Your name
+  title:        "QSPI_SRAM"      # Project title
+  author:       "Sah"      # Your name
   discord:      ""      # Your discord username, for communication and automatically assigning you a Tapeout role (optional)
-  description:  ""      # One line description of what your project does
+  description:  "abs"      # One line description of what your project does
   language:     "Verilog" # other examples include SystemVerilog, Amaranth, VHDL, etc
-  clock_hz:     0       # Clock frequency in Hz (or 0 if not applicable)
+  clock_hz:     100000000       # Clock frequency in Hz (or 0 if not applicable)
 
   # How many tiles your design occupies? A single tile is about 167x108 uM.
   tiles: "1x1"          # Valid values: 1x1, 1x2, 2x2, 3x2, 4x2, 6x2 or 8x2
@@ -23,34 +23,34 @@ project:
 # This section is for the datasheet/website. Use descriptive names (e.g., RX, TX, MOSI, SCL, SEG_A, etc.).
 pinout:
   # Inputs
-  ui[0]: ""
-  ui[1]: ""
-  ui[2]: ""
-  ui[3]: ""
-  ui[4]: ""
-  ui[5]: ""
-  ui[6]: ""
-  ui[7]: ""
+  ui[0]: "data_in_1"
+  ui[1]: "data_in_2"
+  ui[2]: "data_in_3"
+  ui[3]: "data_in_4"
+  ui[4]: "wr_addr_1"
+  ui[5]: "wr_addr_2"
+  ui[6]: "wr_addr_3"
+  ui[7]: "wr_addr_4"
 
   # Outputs
-  uo[0]: ""
-  uo[1]: ""
-  uo[2]: ""
-  uo[3]: ""
-  uo[4]: ""
-  uo[5]: ""
-  uo[6]: ""
-  uo[7]: ""
+  uo[0]: "output_data_1"
+  uo[1]: "output_data_2"
+  uo[2]: "output_data_3"
+  uo[3]: "output_data_4"
+  uo[4]: "output_data_5"
+  uo[5]: "output_data_6"
+  uo[6]: "output_data_7"
+  uo[7]: "output_data_8"
 
   # Bidirectional pins
-  uio[0]: ""
-  uio[1]: ""
-  uio[2]: ""
-  uio[3]: ""
-  uio[4]: ""
-  uio[5]: ""
-  uio[6]: ""
-  uio[7]: ""
-
+  uio[0]: "wr_addr_5"
+  uio[1]: "Wen"
+  uio[2]: "Ren"
+  uio[3]: "rd_sel_1"
+  uio[4]: "rd_sel_2"
+  uio[5]: "rd_sel_3"
+  uio[6]: "rd_sel_4"
+  uio[7]: "rd_sel_5"
+  
 # Do not change!
 yaml_version: 6
