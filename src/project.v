@@ -29,6 +29,7 @@ module tt_um_example (
     wire       wen     = uio_in[1];
     wire       ren     = uio_in[2];
     wire [4:0] rd_sel  = uio_in[7:3];
+
     reg [7:0] data_out;
 
     assign uo_out = data_out;
@@ -95,11 +96,11 @@ module tt_um_example (
         if (rst) begin
             msb_buf      <= 4'b0000;
             nibble_phase <= 1'b0;
-            data_out     <= 8'h00;
+            data_out       <= 8'h00;
             mem_cells    <= 256'b0;
         end else if (!cs) begin
             nibble_phase <= 1'b0;
-            data_out     <= 8'h00;
+            data_out       <= 8'h00;
         end else begin
             // --- Write Path: 2 Consecutive Clocks ---
             if (!wen) begin
@@ -115,22 +116,20 @@ module tt_um_example (
                     $display("  Target Write Address: %0d", wr_addr);
                 end else begin
                     // Clock 2: Assemble MSB + LSB into full 8-bit byte and encrypt
-                    /* verilator lint_off BLKSEQ */
                     full_assembled_byte = {msb_buf, io_in};
                     full_encrypted_byte = full_assembled_byte ^ CIPHER_KEY;
-                    /* verilator lint_on BLKSEQ */
-                    
                     nibble_phase        <= 1'b0;
-                   $display("\n[WRITE CYCLE 2: LSB & COMMIT TO 256-BIT MATRIX]");
-                   $display("  Incoming ui_in[3:0] : 4'b%04b", io_in);
-                   $display("  Buffered MSB        : 4'b%04b", msb_buf);
-                   $display("  Assembled 8-Bit Data: 8'b%08b (0x%02X)", full_assembled_byte, full_assembled_byte);
-                   $display("  XOR Encrypted Byte  : 8'b%08b (0x%02X)", full_encrypted_byte, full_encrypted_byte);
+
+                    $display("\n[WRITE CYCLE 2: LSB & COMMIT TO 256-BIT MATRIX]");
+                    $display("  Incoming ui_in[3:0] : 4'b%04b", io_in);
+                    $display("  Buffered MSB        : 4'b%04b", msb_buf);
+                    $display("  Assembled 8-Bit Data: 8'b%08b (0x%02X)", full_assembled_byte, full_assembled_byte);
+                    $display("  XOR Encrypted Byte  : 8'b%08b (0x%02X)", full_encrypted_byte, full_encrypted_byte);
 
                     if (addr_ready_flag) begin
                         for (bit_idx = 0; bit_idx < 256; bit_idx = bit_idx + 1) begin
                             if (wr_bit_enables[bit_idx]) begin
-                                Map bit_idx modulo 8 to drive 0..7, 8..15, ..., 248..255 correctly
+                                // Map bit_idx modulo 8 to drive 0..7, 8..15, ..., 248..255 correctly
                                 mem_cells[bit_idx] <= full_encrypted_byte[bit_idx % 8];
                             end
                         end
