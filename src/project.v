@@ -135,7 +135,7 @@ module tt_um_example (
                             end
                         end
                         $display("  [SUCCESS] Written into bit-slice [%0d:%0d] of 256-bit memory", 
-                                 //wr_addr*8 + 7, wr_addr*8);
+                                 wr_addr*8 + 7, wr_addr*8);
                     end
                 end
             end
