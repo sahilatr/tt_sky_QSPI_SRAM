@@ -29,7 +29,6 @@ module tt_um_example (
     wire       wen     = uio_in[1];
     wire       ren     = uio_in[2];
     wire [4:0] rd_sel  = uio_in[7:3];
-
     reg [7:0] data_out;
 
     assign uo_out = data_out;
