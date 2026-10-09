@@ -16,6 +16,20 @@ module tt_um_example (
     input  wire       rst_n     // reset_n - low to reset
 );
 
+       // Fixed 8-Bit Secret Key for Parallel XOR Encryption & Decryption
+    localparam [7:0] CIPHER_KEY = 8'b1010_1010; // 0xAA
+
+    // ----------------------------------------------------------------
+    // 1. Signal Mapping
+    // ----------------------------------------------------------------
+    wire       rst     = ~rst_n;
+    wire       cs      = ena;
+    wire [3:0] io_in   = ui_in[3:0];
+    wire [4:0] wr_addr = {uio_in[0], ui_in[7:4]};  // {A4, A3, A2, A1, A0}
+    wire       wen     = uio_in[1];
+    wire       ren     = uio_in[2];
+    wire [4:0] rd_sel  = uio_in[7:3];
+
     assign uio_out = 8'h00;
     assign uio_oe  = 8'h00;
 
