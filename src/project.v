@@ -96,11 +96,11 @@ module tt_um_example (
         if (rst) begin
             msb_buf      <= 4'b0000;
             nibble_phase <= 1'b0;
-            data_out       <= 8'h00;
+            data_out     <= 8'h00;
             mem_cells    <= 256'b0;
         end else if (!cs) begin
             nibble_phase <= 1'b0;
-            data_out       <= 8'h00;
+            data_out     <= 8'h00;
         end else begin
             // --- Write Path: 2 Consecutive Clocks ---
             if (!wen) begin
@@ -116,8 +116,11 @@ module tt_um_example (
                     $display("  Target Write Address: %0d", wr_addr);
                 end else begin
                     // Clock 2: Assemble MSB + LSB into full 8-bit byte and encrypt
+                    /* verilator lint_off BLKSEQ */
                     full_assembled_byte = {msb_buf, io_in};
                     full_encrypted_byte = full_assembled_byte ^ CIPHER_KEY;
+                    /* verilator lint_on BLKSEQ */
+                    
                     nibble_phase        <= 1'b0;
 
                     $display("\n[WRITE CYCLE 2: LSB & COMMIT TO 256-BIT MATRIX]");
