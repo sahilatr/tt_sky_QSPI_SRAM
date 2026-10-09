@@ -121,22 +121,25 @@ module tt_um_example (
                     /* verilator lint_on BLKSEQ */
                     
                     nibble_phase        <= 1'b0;
-
-                    $display("\n[WRITE CYCLE 2: LSB & COMMIT TO 256-BIT MATRIX]");
-                    $display("  Incoming ui_in[3:0] : 4'b%04b", io_in);
-                    $display("  Buffered MSB        : 4'b%04b", msb_buf);
-                    $display("  Assembled 8-Bit Data: 8'b%08b (0x%02X)", full_assembled_byte, full_assembled_byte);
-                    $display("  XOR Encrypted Byte  : 8'b%08b (0x%02X)", full_encrypted_byte, full_encrypted_byte);
-
                     if (addr_ready_flag) begin
-                        for (bit_idx = 0; bit_idx < 256; bit_idx = bit_idx + 1) begin
-                            if (wr_bit_enables[bit_idx]) begin
+                    mem_cells[wr_addr * 8 +: 8] <= full_encrypted_byte;
+                    $display("  [SUCCESS] Written into address %0d", wr_addr);
+                end
+                   // $display("\n[WRITE CYCLE 2: LSB & COMMIT TO 256-BIT MATRIX]");
+                   //$display("  Incoming ui_in[3:0] : 4'b%04b", io_in);
+                   //$display("  Buffered MSB        : 4'b%04b", msb_buf);
+                   //$display("  Assembled 8-Bit Data: 8'b%08b (0x%02X)", full_assembled_byte, full_assembled_byte);
+                   //$display("  XOR Encrypted Byte  : 8'b%08b (0x%02X)", full_encrypted_byte, full_encrypted_byte);
+
+                    //if (addr_ready_flag) begin
+                        //for (bit_idx = 0; bit_idx < 256; bit_idx = bit_idx + 1) begin
+                            //if (wr_bit_enables[bit_idx]) begin
                                 // Map bit_idx modulo 8 to drive 0..7, 8..15, ..., 248..255 correctly
-                                mem_cells[bit_idx] <= full_encrypted_byte[bit_idx % 8];
-                            end
-                        end
-                        $display("  [SUCCESS] Written into bit-slice [%0d:%0d] of 256-bit memory", 
-                                 wr_addr*8 + 7, wr_addr*8);
+                                //mem_cells[bit_idx] <= full_encrypted_byte[bit_idx % 8];
+                            //end
+                        //end
+                        //$display("  [SUCCESS] Written into bit-slice [%0d:%0d] of 256-bit memory", 
+                                 //wr_addr*8 + 7, wr_addr*8);
                     end
                 end
             end
