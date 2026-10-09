@@ -30,6 +30,9 @@ module tt_um_example (
     wire       ren     = uio_in[2];
     wire [4:0] rd_sel  = uio_in[7:3];
 
+    reg data_out;
+
+    assign uo_out = data_out;
     assign uio_out = 8'h00;
     assign uio_oe  = 8'h00;
 
@@ -93,11 +96,11 @@ module tt_um_example (
         if (rst) begin
             msb_buf      <= 4'b0000;
             nibble_phase <= 1'b0;
-            uo_out       <= 8'h00;
+            data_out       <= 8'h00;
             mem_cells    <= 256'b0;
         end else if (!cs) begin
             nibble_phase <= 1'b0;
-            uo_out       <= 8'h00;
+            data_out       <= 8'h00;
         end else begin
             // --- Write Path: 2 Consecutive Clocks ---
             if (!wen) begin
@@ -138,16 +141,16 @@ module tt_um_example (
 
             // --- Read Path: 1-Clock Parallel Decrypted Readout ---
             if (!ren) begin
-                uo_out <= 8'h00;
+                data_out <= 8'h00;
             end else begin
-                // Decrypt from the 8-bit read bitlines onto dedicated uo_out pins
-                uo_out <= rd_bitline ^ CIPHER_KEY;
+                // Decrypt from the 8-bit read bitlines onto dedicated data_out pins
+                data_out <= rd_bitline ^ CIPHER_KEY;
 
                 $display("\n[DECODER-DRIVEN READOUT]");
                 $display("  Read Target Address   : %0d", rd_sel);
                 $display("  Bit-Slice Selected    : [%0d:%0d]", rd_sel*8 + 7, rd_sel*8);
                 $display("  Read Bitline Encrypted: 8'b%08b (0x%02X)", rd_bitline, rd_bitline);
-                $display("  Decrypted uo_out Bus  : 8'b%08b (0x%02X)", rd_bitline ^ CIPHER_KEY, rd_bitline ^ CIPHER_KEY);
+                $display("  Decrypted data_out Bus  : 8'b%08b (0x%02X)", rd_bitline ^ CIPHER_KEY, rd_bitline ^ CIPHER_KEY);
             end
         end
     end
