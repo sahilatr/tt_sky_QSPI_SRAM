@@ -3,7 +3,7 @@
 
 import cocotb
 from cocotb.clock import Clock
-from cocotb.triggers import ClockCycles, FallingEdge, RisingEdge, Timer
+from cocotb.triggers import ClockCycles, FallingEdge, Timer
 
 
 @cocotb.test()
@@ -29,19 +29,18 @@ async def test_project(dut):
     # Helper coroutine: Standard 2-Clock Write
     async def write_byte(addr, data):
         await FallingEdge(dut.clk)
-        # Setup address (A0-A3 on ui_in[7:4]) and MSB data on ui_in[3:0]
+        # Setup address [A3:A0] on ui_in[7:4] and A4 on uio_in[0], MSB data on ui_in[3:0]
         dut.ui_in.value = ((addr & 0x0F) << 4) | ((data >> 4) & 0x0F)
-        # uio_in: bit 0 = A4, bit 1 = wen, bit 2 = ren
-        current_uio = dut.uio_in.value.to_unsigned() & ~0x1F
-        current_uio |= ((addr >> 4) & 0x01) | (1 << 1) | (0 << 2)
+        current_uio = dut.uio_in.value.to_unsigned() & ~0x1F  # clear lower bits
+        current_uio |= ((addr >> 4) & 0x01) | (1 << 1) | (0 << 2)  # wen=1, ren=0
         dut.uio_in.value = current_uio
 
         await FallingEdge(dut.clk)
-        # Drive LSB for clock 2 on ui_in[3:0]
+        # Clock 2: Drive LSB data on ui_in[3:0]
         dut.ui_in.value = (dut.ui_in.value.to_unsigned() & 0xF0) | (data & 0x0F)
 
         await FallingEdge(dut.clk)
-        # Clear control lines (wen = 0)
+        # Clear write enable (wen = 0)
         current_uio = dut.uio_in.value.to_unsigned() & ~(1 << 1)
         dut.uio_in.value = current_uio
         dut.ui_in.value = dut.ui_in.value.to_unsigned() & 0xF0
@@ -51,27 +50,27 @@ async def test_project(dut):
         wr_addr, wr_data, rd_addr, expected_rd_data
     ):
         await FallingEdge(dut.clk)
-        # Setup Write Target & MSB Data
-        ui_val = ((wr_addr & 0x0F) << 4) | ((wr_data >> 4) & 0x0F)
-        dut.ui_in.value = ui_val
+        # Setup Write Target MSB & Address, plus Read Address (rd_sel on uio_in[7:3]) & Controls (wen=1, ren=1)
+        dut.ui_in.value = ((wr_addr & 0x0F) << 4) | ((wr_data >> 4) & 0x0F)
 
-        # Setup Read Target (rd_sel on uio_in[7:3]) & Control (wen=1, ren=1, A4 on uio_in[0])
         current_uio = dut.uio_in.value.to_unsigned() & ~0xFF
         current_uio |= (
             ((wr_addr >> 4) & 0x01)
             | (1 << 1)  # wen = 1
             | (1 << 2)  # ren = 1
-            | ((rd_addr & 0x1F) << 3)  # rd_sel on uio_in[7:3]
+            | ((rd_addr & 0x1F) << 3)  # rd_sel
         )
         dut.uio_in.value = current_uio
         dut.ena.value = 1
 
         await FallingEdge(dut.clk)
-        # Drive LSB for write commit clock 2 (keep uio_in controls stable)
-        dut.ui_in.value = (dut.ui_in.value.to_unsigned() & 0xF0) | (wr_data & 0x0F)
+        # Drive LSB for write commit clock 2
+        dut.ui_in.value = (dut.ui_in.value.to_unsigned() & 0xF0) | (
+            wr_data & 0x0F
+        )
 
-        # Allow combinatorial read propagation before sampling
-        await Timer(4, unit="ns")
+        # Allow combinatorial data to propagate and settle
+        await Timer(3, unit="ns")
 
         actual_uo = dut.uo_out.value.to_unsigned()
         if actual_uo == expected_rd_data:
@@ -86,7 +85,7 @@ async def test_project(dut):
             assert actual_uo == expected_rd_data
 
         await FallingEdge(dut.clk)
-        # Clear enables (wen = 0, ren = 0)
+        # Clear enables
         current_uio = dut.uio_in.value.to_unsigned() & ~((1 << 1) | (1 << 2))
         dut.uio_in.value = current_uio
         dut.ui_in.value = dut.ui_in.value.to_unsigned() & 0xF0
